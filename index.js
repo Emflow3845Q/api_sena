@@ -1,27 +1,31 @@
 import express from "express";
 import bodyParser from "body-parser";
-import connection from "./connectionDB.js";
 import mongoose from "mongoose";
 import router from "./routes/Post.js";
-import Post from "./models/Post.js";
+import connection from "./connectionDB.js"; 
 
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 mongoose.set("strictQuery", false);
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
+async function startServer() {
+  try {
+    await connection();
 
-const post = new Post({
-  title: "Test post",
-  description: "This is a test post",
-});
+    app.get("/", (req, res) => {
+      res.send("Hello World!");
+    });
 
-app.use("/servicios", router);
+    app.use("/servicios", router);
 
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
-  connection().catch(console.error);
-});
+    app.listen(3000, () => {
+      console.log("Server is running on port 3000");
+    });
+  } catch (error) {
+    console.error("Error al conectar a la base de datos:", error);
+    process.exit(1); 
+  }
+}
+
+startServer();
